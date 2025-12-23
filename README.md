@@ -5,11 +5,42 @@ A Flutter mobile application with WordPress integration using Keycloak authentic
 ## Features
 
 - **Keycloak Authentication**: Secure authentication using Keycloak OAuth2/OpenID Connect
+- **Demo Mode**: Test the app without configuring backend services
 - **WordPress Integration**: Connect and interact with WordPress websites via REST API
 - **Digital Ocean Support**: Integration with Digital Ocean API for infrastructure management
 - **API Services**: Extensible API service layer for connecting to multiple platforms
 - **Secure Storage**: Token management using Flutter Secure Storage
 - **Modern UI**: Material Design 3 with responsive layouts
+- **Back Navigation**: Intuitive navigation with back buttons on all screens
+
+## Quick Start (Demo Mode)
+
+Want to test the app immediately without setting up backend services?
+
+1. **Clone and Install**
+   ```bash
+   git clone https://github.com/ealiusazamsha/test-app.git
+   cd test-app
+   flutter pub get
+   ```
+
+2. **Run the App**
+   ```bash
+   flutter run
+   ```
+
+3. **Login with Demo Credentials**
+   - Enter any username (e.g., "demo")
+   - Enter any password (e.g., "password")
+   - The app will automatically use demo mode!
+
+**Demo Mode Features:**
+- ✅ Works without backend configuration
+- ✅ Demo authentication (any credentials work)
+- ✅ Sample WordPress posts
+- ✅ Sample Digital Ocean droplets
+- ✅ Full UI navigation and features
+- ℹ️ Demo mode indicators shown in the app
 
 ## Architecture
 
@@ -24,7 +55,10 @@ lib/
 ├── screens/                  # UI screens
 │   ├── splash_screen.dart
 │   ├── login_screen.dart
-│   └── home_screen.dart
+│   ├── home_screen.dart
+│   ├── post_detail_screen.dart
+│   ├── digital_ocean_screen.dart
+│   └── settings_screen.dart
 ├── services/                 # Business logic and API services
 │   ├── auth_service.dart
 │   ├── wordpress_service.dart
@@ -39,14 +73,45 @@ lib/
 
 ## Prerequisites
 
+### For Demo Mode (No Setup Required)
+- Flutter SDK (>=3.0.0)
+- Dart SDK (>=3.0.0)
+
+### For Production Use
 - Flutter SDK (>=3.0.0)
 - Dart SDK (>=3.0.0)
 - Xcode (for iOS development)
 - Android Studio (for Android development)
-- Keycloak server instance
-- WordPress website with REST API enabled
+- Keycloak server instance (optional - for real authentication)
+- WordPress website with REST API enabled (optional - for real content)
+- Digital Ocean account (optional - for infrastructure management)
 
 ## Setup Instructions
+
+### Quick Demo Setup (Recommended for Testing)
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/ealiusazamsha/test-app.git
+   cd test-app
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Run the App**
+   ```bash
+   flutter run
+   ```
+
+4. **Login**
+   - Enter any username and password
+   - App automatically runs in demo mode
+   - Explore all features with sample data!
+
+### Production Setup (With Real Backend Services)
 
 ### 1. Clone the Repository
 
@@ -106,6 +171,47 @@ flutter run -d android
 ```bash
 flutter run -d chrome
 ```
+
+## Demo Mode vs Production Mode
+
+### Demo Mode (Default)
+
+The app automatically runs in **demo mode** when:
+- No `.env` file is present, OR
+- `.env` contains placeholder values (e.g., `your-keycloak-server.com`)
+
+**What works in demo mode:**
+- ✅ Login with any username/password
+- ✅ View sample WordPress posts (3 demo posts)
+- ✅ View sample Digital Ocean droplets (2 demo droplets)
+- ✅ Full UI navigation and interaction
+- ✅ All screens and features accessible
+- ℹ️ Demo indicators shown in the UI
+
+**Demo mode is perfect for:**
+- Testing the app quickly
+- Exploring UI/UX features
+- Development without backend setup
+- Demo presentations
+
+### Production Mode
+
+The app switches to **production mode** when:
+- `.env` file exists with real backend URLs
+- Keycloak URL doesn't contain placeholder text
+- Client ID is configured properly
+
+**Production mode features:**
+- 🔐 Real Keycloak authentication
+- 📝 Live WordPress content
+- ☁️ Actual Digital Ocean droplets
+- 🔒 Secure token management
+- 🔄 Automatic token refresh
+
+To switch from demo to production:
+1. Create/edit `.env` file with real credentials
+2. Rebuild the app: `flutter clean && flutter pub get`
+3. Run the app again
 
 ## Keycloak Configuration
 
