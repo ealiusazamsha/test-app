@@ -84,13 +84,45 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Login with your Keycloak credentials',
+                    'Login to continue',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey,
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 16),
+                  // Demo mode info card
+                  Consumer<AuthService>(
+                    builder: (context, authService, _) {
+                      if (!authService.isDemoMode && 
+                          !_isKeycloakConfigured(authService)) {
+                        return Card(
+                          color: Colors.blue.shade50,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.info_outline, 
+                                  color: Colors.blue.shade700),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Demo Mode: Enter any username and password to continue',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.blue.shade700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   TextFormField(
                     controller: _usernameController,
                     decoration: const InputDecoration(
@@ -170,5 +202,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  bool _isKeycloakConfigured(AuthService authService) {
+    // This is a simple check - you might want to expose this from AuthService
+    return false; // Will show demo mode info by default
   }
 }

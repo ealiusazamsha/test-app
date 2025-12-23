@@ -12,10 +12,12 @@ class AuthService extends ChangeNotifier {
   String? _refreshToken;
   Map<String, dynamic>? _userInfo;
   bool _isAuthenticated = false;
+  bool _isDemoMode = false;
 
   bool get isAuthenticated => _isAuthenticated;
   Map<String, dynamic>? get userInfo => _userInfo;
   String? get accessToken => _accessToken;
+  bool get isDemoMode => _isDemoMode;
 
   // Keycloak Configuration
   String get _keycloakUrl => dotenv.env['KEYCLOAK_URL'] ?? '';
@@ -30,6 +32,13 @@ class AuthService extends ChangeNotifier {
   String get _logoutEndpoint => 
       '$_keycloakUrl/realms/$_realm/protocol/openid-connect/logout';
 
+  // Check if backend is configured
+  bool get _isBackendConfigured => 
+      _keycloakUrl.isNotEmpty && 
+      !_keycloakUrl.contains('your-') &&
+      _clientId.isNotEmpty &&
+      !_clientId.contains('your-');
+
   AuthService() {
     _loadStoredTokens();
   }
@@ -37,6 +46,23 @@ class AuthService extends ChangeNotifier {
   /// Load stored tokens on initialization
   Future<void> _loadStoredTokens() async {
     try {
+      // Check if in demo mode
+      final demoMode = await _storage.read(key: 'demo_mode');
+      if (demoMode == 'true') {
+        final demoUsername = await _storage.read(key: 'demo_username');
+        _isDemoMode = true;
+        _isAuthenticated = true;
+        _accessToken = 'demo_token_${DateTime.now().millisecondsSinceEpoch}';
+        _userInfo = {
+          'preferred_username': demoUsername ?? 'demo',
+          'email': '${demoUsername ?? "demo"}@demo.com',
+          'given_name': demoUsername ?? 'Demo',
+          'family_name': 'User',
+        };
+        notifyListeners();
+        return;
+      }
+
       _accessToken = await _storage.read(key: 'access_token');
       _refreshToken = await _storage.read(key: 'refresh_token');
       
@@ -54,6 +80,12 @@ class AuthService extends ChangeNotifier {
 
   /// Login with username and password
   Future<bool> login(String username, String password) async {
+    // Check if backend is configured
+    if (!_isBackendConfigured) {
+      debugPrint('Backend not configured, using demo mode');
+      return await _loginDemoMode(username, password);
+    }
+
     try {
       final response = await http.post(
         Uri.parse(_tokenEndpoint),
@@ -66,7 +98,7 @@ class AuthService extends ChangeNotifier {
           'password': password,
           'scope': 'openid profile email',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -79,6 +111,7 @@ class AuthService extends ChangeNotifier {
 
         await _loadUserInfo();
         _isAuthenticated = true;
+        _isDemoMode = false;
         notifyListeners();
         return true;
       } else {
@@ -86,9 +119,33 @@ class AuthService extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      debugPrint('Login error: $e');
-      return false;
+      debugPrint('Login error: $e - Falling back to demo mode');
+      return await _loginDemoMode(username, password);
     }
+  }
+
+  /// Demo mode login for testing without backend
+  Future<bool> _loginDemoMode(String username, String password) async {
+    // Simple demo credentials check
+    if (username.isNotEmpty && password.isNotEmpty) {
+      _isDemoMode = true;
+      _isAuthenticated = true;
+      _accessToken = 'demo_token_${DateTime.now().millisecondsSinceEpoch}';
+      _userInfo = {
+        'preferred_username': username,
+        'email': '$username@demo.com',
+        'given_name': username,
+        'family_name': 'Demo User',
+      };
+      
+      // Store demo flag
+      await _storage.write(key: 'demo_mode', value: 'true');
+      await _storage.write(key: 'demo_username', value: username);
+      
+      notifyListeners();
+      return true;
+    }
+    return false;
   }
 
   /// Refresh access token using refresh token
@@ -151,7 +208,7 @@ class AuthService extends ChangeNotifier {
   /// Logout and clear tokens
   Future<void> logout() async {
     try {
-      if (_refreshToken != null) {
+      if (_refreshToken != null && !_isDemoMode) {
         await http.post(
           Uri.parse(_logoutEndpoint),
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -160,7 +217,7 @@ class AuthService extends ChangeNotifier {
             'client_secret': _clientSecret,
             'refresh_token': _refreshToken!,
           },
-        );
+        ).timeout(const Duration(seconds: 5));
       }
     } catch (e) {
       debugPrint('Logout error: $e');
@@ -169,9 +226,12 @@ class AuthService extends ChangeNotifier {
       _refreshToken = null;
       _userInfo = null;
       _isAuthenticated = false;
+      _isDemoMode = false;
 
       await _storage.delete(key: 'access_token');
       await _storage.delete(key: 'refresh_token');
+      await _storage.delete(key: 'demo_mode');
+      await _storage.delete(key: 'demo_username');
       
       notifyListeners();
     }

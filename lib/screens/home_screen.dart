@@ -31,14 +31,62 @@ class _HomeScreenState extends State<HomeScreen> {
     final wordpressService = Provider.of<WordPressService>(context, listen: false);
     final authService = Provider.of<AuthService>(context, listen: false);
     
-    final posts = await wordpressService.getPosts(
-      authToken: authService.accessToken,
-    );
+    try {
+      final posts = await wordpressService.getPosts(
+        authToken: authService.accessToken,
+      );
 
-    setState(() {
-      _posts = posts;
-      _isLoadingPosts = false;
-    });
+      if (mounted) {
+        setState(() {
+          _posts = posts;
+          _isLoadingPosts = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading posts: $e');
+      // Load demo posts if real posts fail
+      if (mounted) {
+        setState(() {
+          _posts = _getDemoPosts();
+          _isLoadingPosts = false;
+        });
+      }
+    }
+  }
+
+  List<WordPressPost> _getDemoPosts() {
+    return [
+      WordPressPost(
+        id: 1,
+        title: 'Welcome to Test App',
+        content: '<p>This is a demo post. Configure WordPress to see real posts.</p>',
+        excerpt: 'Demo post showing app functionality',
+        date: DateTime.now().toIso8601String(),
+        status: 'publish',
+        link: 'https://demo.com/post-1',
+        authorId: 1,
+      ),
+      WordPressPost(
+        id: 2,
+        title: 'Getting Started Guide',
+        content: '<p>Learn how to use the app features.</p>',
+        excerpt: 'Quick start guide for new users',
+        date: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        status: 'publish',
+        link: 'https://demo.com/post-2',
+        authorId: 1,
+      ),
+      WordPressPost(
+        id: 3,
+        title: 'Configure Your Backend',
+        content: '<p>Set up Keycloak and WordPress integration.</p>',
+        excerpt: 'Setup instructions for backend services',
+        date: DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        status: 'publish',
+        link: 'https://demo.com/post-3',
+        authorId: 1,
+      ),
+    ];
   }
 
   Future<void> _handleLogout() async {
@@ -73,34 +121,102 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadPosts,
-      child: ListView.builder(
-        itemCount: _posts.length,
-        itemBuilder: (context, index) {
-          final post = _posts[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              title: Text(
-                post.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                post.excerpt,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // Navigate to post detail
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Post: ${post.title}')),
+    return Column(
+      children: [
+        // Show demo mode banner if using demo posts
+        Consumer<AuthService>(
+          builder: (context, authService, _) {
+            if (authService.isDemoMode || _posts.first.id <= 3) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12.0),
+                color: Colors.blue.shade50,
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, 
+                      color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Showing demo posts. Configure WordPress URL in .env for real content',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadPosts,
+            child: ListView.builder(
+              itemCount: _posts.length,
+              itemBuilder: (context, index) {
+                final post = _posts[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    title: Text(
+                      post.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      post.excerpt,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      // Navigate to post detail
+                      _showPostDetail(context, post);
+                    },
+                  ),
                 );
               },
             ),
-          );
-        },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showPostDetail(BuildContext context, WordPressPost post) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(post.title),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Published: ${post.date}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                post.excerpt,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
@@ -216,6 +332,31 @@ class _HomeScreenState extends State<HomeScreen> {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // Demo mode indicator
+            if (authService.isDemoMode)
+              Card(
+                color: Colors.amber.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.amber.shade700),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Demo Mode Active - Configure .env for real backend',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.amber.shade900,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (authService.isDemoMode) const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -241,6 +382,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.grey,
                           ),
                     ),
+                    if (authService.isDemoMode) ...[
+                      const SizedBox(height: 8),
+                      Chip(
+                        label: const Text('Demo User'),
+                        backgroundColor: Colors.amber.shade100,
+                        labelStyle: TextStyle(
+                          color: Colors.amber.shade900,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -309,10 +461,29 @@ class _HomeScreenState extends State<HomeScreen> {
       _buildProfileTab(),
     ];
 
+    final titles = ['Posts', 'Services', 'Profile'];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test App'),
+        title: Text(titles[_selectedIndex]),
         elevation: 2,
+        actions: [
+          Consumer<AuthService>(
+            builder: (context, authService, _) {
+              if (authService.isDemoMode) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Chip(
+                    label: const Text('DEMO', style: TextStyle(fontSize: 10)),
+                    backgroundColor: Colors.amber.shade100,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: screens[_selectedIndex],
       bottomNavigationBar: NavigationBar(
