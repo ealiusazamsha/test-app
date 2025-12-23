@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -107,6 +108,36 @@ class SettingsScreen extends StatelessWidget {
             context,
             'Preferences',
             [
+              Consumer<ThemeService>(
+                builder: (context, themeService, _) {
+                  return ListTile(
+                    leading: Icon(
+                      themeService.isDarkMode 
+                          ? Icons.dark_mode 
+                          : Icons.light_mode,
+                    ),
+                    title: const Text('Theme'),
+                    subtitle: Text(
+                      themeService.isDarkMode 
+                          ? 'Dark Mode' 
+                          : themeService.isLightMode 
+                              ? 'Light Mode' 
+                              : 'System Default',
+                    ),
+                    trailing: Switch(
+                      value: themeService.isDarkMode,
+                      onChanged: (value) {
+                        themeService.setThemeMode(
+                          value ? ThemeMode.dark : ThemeMode.light,
+                        );
+                      },
+                    ),
+                    onTap: () {
+                      _showThemeDialog(context);
+                    },
+                  );
+                },
+              ),
               _buildListTile(
                 context,
                 Icons.notifications_outlined,
@@ -115,17 +146,6 @@ class SettingsScreen extends StatelessWidget {
                 () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Notification settings')),
-                  );
-                },
-              ),
-              _buildListTile(
-                context,
-                Icons.palette_outlined,
-                'Theme',
-                'Choose your app theme',
-                () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Theme settings')),
                   );
                 },
               ),
@@ -221,6 +241,57 @@ class SettingsScreen extends StatelessWidget {
           ? const Icon(Icons.arrow_forward_ios, size: 16)
           : null,
       onTap: onTap,
+    );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer<ThemeService>(
+        builder: (context, themeService, _) {
+          return AlertDialog(
+            title: const Text('Choose Theme'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<ThemeMode>(
+                  title: const Text('Light'),
+                  value: ThemeMode.light,
+                  groupValue: themeService.themeMode,
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      themeService.setThemeMode(mode);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('Dark'),
+                  value: ThemeMode.dark,
+                  groupValue: themeService.themeMode,
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      themeService.setThemeMode(mode);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('System Default'),
+                  value: ThemeMode.system,
+                  groupValue: themeService.themeMode,
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      themeService.setThemeMode(mode);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

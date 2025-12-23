@@ -7,6 +7,9 @@ import '../models/wordpress_post.dart';
 import 'post_detail_screen.dart';
 import 'digital_ocean_screen.dart';
 import 'settings_screen.dart';
+import 'profile_edit_screen.dart';
+import 'post_create_screen.dart';
+import 'api_services_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -222,9 +225,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Icons.api_outlined,
               Colors.green,
               () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('API Services screen coming soon'),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ApiServicesScreen(),
                   ),
                 );
               },
@@ -384,8 +388,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: const Text('Profile'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Profile screen coming soon')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileEditScreen(),
+                        ),
                       );
                     },
                   ),
@@ -467,6 +474,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: screens[_selectedIndex],
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PostCreateScreen(),
+                  ),
+                );
+                // Reload posts if a post was created
+                if (result == true) {
+                  _loadPosts();
+                }
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('New Post'),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
