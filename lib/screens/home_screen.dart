@@ -4,6 +4,9 @@ import '../services/auth_service.dart';
 import '../services/wordpress_service.dart';
 import '../services/api_service.dart';
 import '../models/wordpress_post.dart';
+import 'post_detail_screen.dart';
+import 'digital_ocean_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -173,8 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Navigate to post detail
-                      _showPostDetail(context, post);
+                      // Navigate to post detail screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostDetailScreen(post: post),
+                        ),
+                      );
                     },
                   ),
                 );
@@ -183,41 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  void _showPostDetail(BuildContext context, WordPressPost post) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(post.title),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Published: ${post.date}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                post.excerpt,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -234,8 +207,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Icons.cloud_outlined,
               Colors.blue,
               () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Digital Ocean service')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DigitalOceanScreen(),
+                  ),
                 );
               },
             ),
@@ -247,7 +223,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Colors.green,
               () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('API Services')),
+                  const SnackBar(
+                    content: Text('API Services screen coming soon'),
+                  ),
                 );
               },
             ),
@@ -407,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Profile settings')),
+                        const SnackBar(content: Text('Profile screen coming soon')),
                       );
                     },
                   ),
@@ -417,8 +395,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: const Text('Settings'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('App settings')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
                       );
                     },
                   ),
