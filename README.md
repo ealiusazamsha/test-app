@@ -7,8 +7,11 @@ A Flutter mobile application with WordPress integration using Keycloak authentic
 - **Keycloak Authentication**: Secure authentication using Keycloak OAuth2/OpenID Connect
 - **Demo Mode**: Test the app without configuring backend services
 - **WordPress Integration**: Connect and interact with WordPress websites via REST API
+- **Post Creation**: Create and publish WordPress posts from the app
 - **Digital Ocean Support**: Integration with Digital Ocean API for infrastructure management
-- **API Services**: Extensible API service layer for connecting to multiple platforms
+- **API Services**: Extensible API service layer with testing tools for external platforms
+- **Profile Management**: Edit user profile information
+- **Theme Customization**: Light, Dark, and System theme modes
 - **Secure Storage**: Token management using Flutter Secure Storage
 - **Modern UI**: Material Design 3 with responsive layouts
 - **Back Navigation**: Intuitive navigation with back buttons on all screens
@@ -57,12 +60,16 @@ lib/
 │   ├── login_screen.dart
 │   ├── home_screen.dart
 │   ├── post_detail_screen.dart
+│   ├── post_create_screen.dart
+│   ├── profile_edit_screen.dart
 │   ├── digital_ocean_screen.dart
+│   ├── api_services_screen.dart
 │   └── settings_screen.dart
 ├── services/                 # Business logic and API services
 │   ├── auth_service.dart
 │   ├── wordpress_service.dart
-│   └── api_service.dart
+│   ├── api_service.dart
+│   └── theme_service.dart
 ├── utils/                    # Utility classes
 │   ├── constants.dart
 │   └── logger.dart

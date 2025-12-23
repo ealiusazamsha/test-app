@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2024-12-23
+
+### Added
+- Theme customization service with Light, Dark, and System modes
+- Profile editing screen with form validation
+- WordPress post creation interface
+- API Services management screen with testing tools
+- Floating action button for quick post creation
+- Theme switcher in Settings screen
+- Quick access templates for popular APIs (JSONPlaceholder, GitHub)
+- Enhanced Material Design 3 theming
+
+### Improved
+- Settings screen with theme customization controls
+- Navigation flow with new screens
+- User experience with better visual feedback
+- Demo mode support across all new features
+- Form validation and error messages
+
+### Changed
+- Updated main.dart to support theme switching
+- Enhanced home screen with FAB and new screen links
+- Improved settings screen layout
+
+## [1.1.0] - 2024-12-23
+
+### Added
+- Demo mode authentication
+- Demo posts when WordPress unavailable
+- Demo droplets for Digital Ocean
+- Post Detail screen with full content view
+- Digital Ocean screen with droplet management
+- Settings screen with app preferences
+- Back navigation on all screens
+- Demo mode indicators throughout app
+
+### Improved
+- Authentication with automatic fallback
+- Error handling and user feedback
+- Navigation with back buttons
+- UI with demo mode badges
+
+### Fixed
+- Authentication issues when backend not configured
+- Frontend-backend integration problems
+- Missing navigation elements
+
 ## [1.0.0] - 2024-12-23
 
 ### Added

@@ -176,14 +176,22 @@ None reported.
 
 ## Coming Soon
 
-- Profile editing screen
-- Post creation interface
-- Digital Ocean droplet creation flow
-- API Services management screen
-- Theme customization
+- ~~Profile editing screen~~ ✅ **Completed**
+- ~~Post creation interface~~ ✅ **Completed**
+- ~~Digital Ocean droplet creation flow~~ ✅ **Completed**
+- ~~API Services management screen~~ ✅ **Completed**
+- ~~Theme customization~~ ✅ **Completed**
 - Language selection
 - Push notifications
 - Offline support
+
+## New in v1.2.0
+
+- **Theme Customization**: Switch between Light, Dark, and System modes
+- **Profile Editing**: Update your profile information
+- **Post Creation**: Create WordPress posts directly from the app
+- **API Services**: Test external APIs with built-in tools
+- **Enhanced UX**: More polished UI with better feedback
 
 ## Feedback
 
